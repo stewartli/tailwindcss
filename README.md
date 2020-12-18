@@ -20,4 +20,5 @@ prettier.
 `html tag class`: used in Rmarkdown.  
 `html dependency`: used in Shiny by following
 [DivadNojnarg](https://github.com/DivadNojnarg/CaPO4Sim).  
-`website`: to do [consulting jobs]().
+`website`: to do [consulting
+jobs](https://stewartli.github.io/tailwindcss/).
