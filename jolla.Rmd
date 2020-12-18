@@ -1,0 +1,67 @@
+---
+title: "Tobi Burns"
+image: "C:/Users/Stewart Li/Dropbox/_rauditsolutionllp/github/img/logo_original.png"
+links:
+  - LinkedIn: "https://linkedin.com/"
+  - Twitter: "https://twitter.com/"
+  - GitHub: "https://github.com/"
+  - Email: "mailto:email@email.com"
+output:
+  html_document:
+    template: "C:/Users/Stewart Li/Dropbox/_rauditsolutionllp/github/tailwindcss/jolla.html"
+    md_extensions: "-autolink_bare_uris"
+    self_contained: TRUE
+---
+ 
+ 
+I am a classically trained data scientist living in the San Fransisco Bay Area. 
+Currently I work on the Oculus team at Facebook. I love talking about baseball, 
+true crime podcasts, and causal inference.
+
+
+```{r}
+knitr::knit_exit()
+```
+
+
+[postcards](https://github.com/seankross/postcards)
+[parallaxr](https://github.com/martinctc/parallaxr)
+
+
+What I learn;
+
+1. `html template`: is [pandoc html template](https://bookdown.org/yihui/rmarkdown-cookbook/html-template.html).    
+2. `jolla.html`: render exactly same content.   
+3. `output`: is a function.    
+4. `export function`: only way is to use package.    
+5. `pandoc.exe`: when rendering output, path is not correct because of my windows user name.    
+6. `pandoc.version`: use 2.8 or above.    
+
+1. `md2html`: parse `markdown` and place them accordingly.
+2. `footer.html`, `style.css`: parallax.js effect action and css. 
+3. `writeLines("test.html")`: `yaml::yaml.load()`, `htmltools::html_print()`
+4. `github action`:
+
+
+```{r}
+jolla <- function(template_file="C:/Users/Stewart Li/Dropbox/_rauditsolutionllp/github/tailwindcss/jolla.html", 
+                  self_contained=TRUE) {
+  rmarkdown::html_document(
+    theme = NULL,
+    self_contained = self_contained,
+    mathjax = NULL,
+    template = template_file,
+    md_extensions = "-autolink_bare_uris"
+  )
+}
+
+assign("jolla", "jolla", envir = .GlobalEnv)
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,311 @@
+---
+title: "tailwindcss to shiny"
+author: "Stewart Li"
+date: "12/10/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(shiny)
+library(htmltools)
+```
+
+
+## Resource
+
+
+[Unleash Shiny Exercise 1 corrections 2020](https://www.youtube.com/watch?v=VX8-szdSHZo&t=200s)
+[Unleash Shiny Exercise 2 corrections 2020](https://www.youtube.com/watch?v=6RMVLR2mjk4)
+
+
+## Functions
+
+
+[charpente/R/html2R.R](https://github.com/RinteRface/charpente/blob/master/R/html2R.R)
+
+
+```{r}
+html_2_R <- function(html, path = "/html/body/*", prefix = FALSE) {
+  cli_h2("Converting code ...")
+  r_output <- html %>%
+    htmlParse %>%
+    getNodeSet(path) %>%
+    `[[`(1) %>%
+    render_node(prefix = prefix)
+
+  if (exists("r_output")) {
+    cli_alert_success("Code converted with success.")
+    cli_alert_info("Copy and paste the following R code")
+    cli_rule()
+    cli_code(style_text(r_output))
+  } else {
+    cli_alert_danger("Failed to convert code.")
+  }
+}
+```
+
+
+```{r}
+dropNulls <- function(x) {
+  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
+}
+```
+
+
+## CSS
+
+
+### Add HTML dependencies
+
+
+[separate folder](https://unpkg.com/browse/tailwindcss@1.9.6/)
+[Tailwind CSS Example](https://codepen.io/bradtraversy/pen/JgXqBL)
+
+
+```{r}
+add_tailwind_deps <- function(tag){
+  tailwind_deps <- htmltools::htmlDependency(
+    name = "tailwind", 
+    version = "1.9.6", 
+    src = c(href = "https://unpkg.com/tailwindcss@1.9.6/"), 
+    stylesheet = c("dist/tailwind.min.css") # different folder***
+  )
+  htmltools::tagList(tag, tailwind_deps)
+}
+
+findDependencies(add_tailwind_deps(div())) # add deps to all tags***
+```
+
+
+### Create R functions
+
+
+```{r}
+page_tailwind <- function(..., title = NULL){
+  tagList(
+    tags$head(
+      tags$meta(charset = "utf-8"), 
+      tags$meta(
+        name = "viewport", 
+        content = "width=device-width, initial-scale=1"
+      ), 
+      tags$title(title)
+    ), 
+    add_tailwind_deps(tags$body(...)) # ... create shiny page
+  )
+}
+
+findDependencies(page_tailwind())
+```
+
+
+### Example1: Shiny application works
+
+
+```{r}
+ui <- page_tailwind(
+  title = "Tailwindcss", 
+  HTML(
+    '<div class="max-w-sm mx-auto flex p-6 bg-white rounded-lg shadow-xl">
+      <div class="flex-shrink-0">
+        <img src="https://i.ibb.co/vX8pYzZ/logo-only.png" alt="" class="h-12 w-12" />
+      </div>
+      <div class="ml-6 pt-1">
+        <h4 class="text-xl text-gray-900">Traversy Media</h4>
+        <p class="text-base text-gray-600">You have a new message!</p>
+      </div>
+    </div>'
+  )
+)
+
+server <- function(input, output, session){}
+
+shinyApp(ui, server)
+```
+
+
+### Customize shiny inputs
+
+
+```{r}
+trace("actionButton", edit = TRUE) # class: action-button
+
+actionButton <- function(inputId, label, icon = NULL, width = NULL, ...){
+    value <- restoreInput(id = inputId, default = NULL)
+    tags$button(
+      id = inputId, 
+      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"), 
+      type = "button", 
+      class = "btn btn-default action-button", 
+      `data-val` = value, 
+      list(shiny:::validateIcon(icon), label), ...
+    )
+}
+```
+
+
+### Example2: Shiny Input binding works
+
+
+```{r}
+tailwind_button <- function(inputId, label){
+  tags$button(id = inputId, 
+              class = "bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded action-button", 
+              label
+  )
+}
+
+ui <- page_tailwind(
+  tailwind_button("test", "Click me")
+) # have to use page_tailwind function that contains deps***
+
+server <- function(input, output, session){
+  observeEvent(input$test, {
+    showNotification("I use Tailwindcss", type = "warning")
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+## JS
+
+
+### Add JS dependencies
+
+
+[bulma.js dependencies](https://www.jsdelivr.com/package/npm/@vizuaalog/bulmajs?version=0.11.0).
+[bulma.js documentation](https://vizuaalog.github.io/BulmaJS/docs/0.9/notification)
+
+
+```{r}
+add_bulmajs_deps <- function(tag){
+  bulmajs_deps <- htmltools::htmlDependency(
+    name = "bulmajs", 
+    version = "0.11.0", # recent version: api changed***
+    src = c(href = "https://cdn.jsdelivr.net/npm/@vizuaalog/bulmajs@0.12.0/"), 
+    script = c("dist/notification.js") 
+  )
+  htmltools::tagList(tag, bulmajs_deps)
+}
+
+add_bulmajs_deps(page_tailwind()) # arg is tag, use directly inside***
+```
+
+
+### Shiny.js
+
+
+From R to JS.
+
+
+```{js}
+$(document).ready(function(){
+Shiny.addCustomMessageHandler("notification", function(message){
+  if (message.id === undefined) {
+      Bulma("body").notification(message.options).show();
+    } else {
+      Bulma("#" + message.id).notification(message.options).show();
+    }
+});
+});
+```
+
+
+From JS to R.
+
+
+```{js}
+$(document).ready(function(){
+Shiny.addCustomMessageHandler("notification", function(message){
+  let notif;  
+  if (message.id === undefined) {
+      notif = Bulma("body").notification(message.options);
+    } else {
+      notif = Bulma("#" + message.id).notification(message.options);
+    }
+  notif.show();
+  notif.on("close", function(){
+    Shiny.setInputValue("notification_close", true, {priority: "event"}); //true, priority
+  });
+});
+});
+```
+
+
+```{r}
+show_bulma_notification <- function(id = NULL, options = NULL, session = shiny::getDefaultReactiveDomain()){
+  message <- dropNulls(
+    list(id = id, 
+         options = dropNulls(options)) # based on bulmajs
+    )
+  session$sendCustomMessage(type = "notification", message)
+}
+```
+
+
+### Example3: Shiny application works 
+
+
+```{r}
+ui <- add_bulmajs_deps(
+  page_tailwind(
+    tailwind_button("test", "Click me"), 
+    div(id = "target", style = "top: 0px; right: 0px; position: absolute;", class = "bg-red-500"), 
+    tags$script(
+      '$(document).ready(function(){
+         Shiny.addCustomMessageHandler("notification", function(message){
+          let notif;  
+          if (message.id === undefined) {
+             notif = Bulma("body").notification(message.options);
+          } else {
+            notif = Bulma("#" + message.id).notification(message.options);
+          }
+          notif.show();
+          notif.on("close", function(){
+          Shiny.setInputValue("notification_close", true, {priority: "event"});
+          });
+         });
+        });'
+    )
+  )
+)
+
+server <- function(input, output, session){
+  observeEvent(input$test, {
+    show_bulma_notification(
+      id = "target", 
+      options = list(
+        body = "This is the message", 
+        color = "danger", # possibly require bulma.css, so i change div tailwindcss bg***
+        dismissInterval = 2000
+      )
+    )
+  })
+  observeEvent(input$notification_close, {
+   showModal(modalDialog(title = "Modal", "Some text", class="bg-pink-800")) # css conflicted***
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

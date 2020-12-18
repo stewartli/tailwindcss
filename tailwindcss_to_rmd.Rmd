@@ -1,0 +1,136 @@
+---
+title: "tailwindcss to rmarkdown"
+author: "Stewart Li"
+date: "12/9/2020"
+output: 
+  html_document:
+    css: [C:/Users/Stewart Li/Dropbox/_rauditsolutionllp/github/tailwindcss/style.css]
+# params:
+#   df: !r readr::read_csv('https://raw.githubusercontent.com/stewartli/auditworkpaper/master/data/gl.csv')
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, error = FALSE, message = FALSE)
+
+library(tidyverse)
+```
+
+
+<blockquote>
+  <p class="text-purple-600">
+        “Tailwind CSS is the only framework that I've seen scale
+        on large teams. It’s easy to customize, adapts to any design,
+        and the build size is tiny (works).”
+  </p>
+</blockquote>
+
+
+<figure class="bg-gray-100 rounded-xl p-8">
+  <img class="w-32 h-32 rounded-full mx-auto" src="C:/Users/Stewart Li/Dropbox/_rauditsolutionllp/github/img/logo_original.png" alt="" width="384" height="512">     
+    <blockquote>
+      <p class="text-lg f">
+        “Tailwind CSS is the only framework that I've seen scale
+        on large teams. It’s easy to customize, adapts to any design,
+        and the build size is tiny.”
+      </p>
+    </blockquote>     
+    <figcaption>
+      <div>
+        Sarah Dayan
+      </div>
+      <div>
+        Staff Engineer, Algolia
+      </div>
+    </figcaption>    
+</figure>
+
+
+<article class="prose lg:prose-xl">
+  <h1>Garlic bread with cheese: What the science tells us</h1>
+  <p>
+    For years parents have espoused the health benefits of eating garlic bread with cheese to their
+    children, with the food earning such an iconic status in our culture that kids will often dress
+    up as warm, cheesy loaf for Halloween.
+  </p>
+  <p>
+    But a recent study shows that the celebrated appetizer may be linked to a series of rabies cases
+    springing up around the country.
+  </p>
+</article>
+
+
+<div class="container bg-blue-700 mx-auto hover:bg-blue-300">
+That is a section.
+</div>
+
+
+<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-5" role="alert">
+<strong class="font-bold">Alert!</strong>
+<span class="block sm:inline">Please update your password</span>
+</div>
+</div>
+
+
+<div class="max-w-sm mx-auto flex p-6 bg-white rounded-lg shadow-xl">
+<div class="flex-shrink-0">
+<img src="https://i.ibb.co/vX8pYzZ/logo-only.png" alt="" class="h-12 w-12" />
+</div>
+<div class="ml-6 pt-1">
+<h4 class="text-xl text-gray-900">Traversy Media</h4>
+<p class="text-base text-gray-600">You have a new message!</p>
+</div>
+</div>
+
+
+```{r}
+knitr::knit_exit()
+```
+
+
+```{r include=FALSE}
+df <- params$df
+```
+
+
+```{r}
+str(df)
+```
+
+
+```{r}
+df %>% 
+  ggplot(aes(credit, debit)) +
+  geom_point()
+```
+
+
+What I learn; 
+
+1. `tags$head(tags$link())`:  link tailwindcss into head of html does not work due to some reason. 
+2. `@import`: import tailwindcss into css instead.
+3. `<pre><code>`: rmarkdown does not render html properly possible due to bootstrap conflict. 
+
+1. `<article class="prose lg:prose-xl">`: make article prettier.
+2. `<blockquote>`: works fully. 
+3. `<figcaption>`: does not works. 
+4. `<article>`: works.
+5. `<div class="container">`: works.
+6. `<alert>`: works.
+7. `<card>`: works.
+
+1. `params: df: !r readr::read_csv()` works. 
+2. `str(df)`: does not show up on html page. 
+
+
+
+
+
+
+
+
+
+
+
+
+
